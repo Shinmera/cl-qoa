@@ -69,7 +69,7 @@
 
 (defmethod print-object ((frame frame) stream)
   (print-unreadable-object (frame stream :type T :identity T)
-    (format stream "~d channels @ ~d Hz" (channels frame) (samplerate frame))))
+    (format stream "~d channel~:p @ ~d Hz" (frame-channels frame) (frame-samplerate frame))))
 
 (bs:define-io-structure file
   "qoaf"
@@ -85,7 +85,8 @@
 (defmethod print-object ((file file) stream)
   (print-unreadable-object (file stream :type T :identity T)
     (if (< 0 (length (file-frames file)))
-        (format stream "~d channels @ ~d Hz" (channels file) (samplerate file))
+        (format stream "~d samples, ~d channel~:p, ~d Hz"
+                (file-samples file) (channels file) (samplerate file))
         (format stream "INVALID"))))
 
 (defun lms-predict (lms)
@@ -214,7 +215,7 @@
 
 (defun encode (samples &key (channels 2) (samplerate 44100))
   (check-type samples (simple-array (signed-byte 16) (*)))
-  (assert (<= 0 channels MAX-CHANNELS))
+  (assert (<= 1 channels MAX-CHANNELS))
   (assert (<= 0 samplerate #xffffff))
   (let* ((state (make-state :channels channels :samplerate samplerate :samples (length samples)))
          (frames (make-array (truncate (+ (length samples) -1 FRAME-LENGTH) FRAME-LENGTH))))
@@ -263,10 +264,10 @@
                       (incf p))
           finally (return start))))
 
-(defun decode-to-buffer (file samples &key (frame-start 0) (start 0) end)
+(defun decode-to-buffer (file samples &key (frame-start 0) (start 0) (end (length samples)))
   (check-type samples (simple-array (signed-byte 16) (*)))
-  (assert (<= 0 start (1- (length samples))))
-  (assert (<= 0 end (1- (length samples))))
+  (assert (<= 0 start (length samples)))
+  (assert (<= 0 end (length samples)))
   (assert (<= 0 frame-start (1- (length (file-frames file)))))
   (loop for frame = (aref (file-frames file) frame-start)
         do (setf start (decode-frame frame samples start end))
