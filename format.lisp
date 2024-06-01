@@ -67,6 +67,10 @@
   (state (vector lms (bs:slot channels)))
   (slices (vector uint64 (* 256 (bs:slot channels)))))
 
+(defmethod print-object ((frame frame) stream)
+  (print-unreadable-object (frame stream :type T :identity T)
+    (format stream "~d channels @ ~d Hz" (channels frame) (samplerate frame))))
+
 (bs:define-io-structure file
   "qoaf"
   (samples uint32)
@@ -90,7 +94,7 @@
   (let ((weights (lms-weights lms))
         (history (lms-history lms)))
     (ash (loop for i from 0 below LMS-LENGTH
-               sum (* (aref weights i) (aref history i)) of-type (unsigned-byte 64))
+               sum (* (aref weights i) (aref history i)) of-type (signed-byte 64))
          -13)))
 
 (defun lms-update (lms sample residual)
@@ -144,6 +148,9 @@
   (samples 0 :type (unsigned-byte 32))
   (lms (map-into (make-array MAX-CHANNELS) #'make-lms) :type (simple-array lms (#.MAX-CHANNELS))))
 
+(defmethod print-object ((state state) stream)
+  (print-unreadable-object (state stream :type T :identity T)))
+
 (defun encode-frame (samples start state frame-len)
   (declare (type (unsigned-byte 32) frame-len))
   (declare (type (simple-array (signed-byte 16) (*)) samples))
@@ -159,7 +166,9 @@
           for sample-index from 0 below frame-len by SLICE-LENGTH
           do (loop for c from 0 below channels
                    for slice-len = (clamp SLICE-LENGTH 0 (- frame-len sample-index))
-                   for best-rank = -1
+                   for slice-start = (+ c (* channels sample-index))
+                   for slice-end = (+ c (* channels (+ sample-index slice-len)))
+                   for best-rank = most-positive-fixnum
                    for best-slice = 0
                    for best-lms = NIL
                    for best-scale-factor = 0
@@ -168,9 +177,7 @@
                             for lms = (copy-lms (aref (state-lms state) c))
                             for slice = scale-factor
                             for current-rank = 0
-                            do (loop for si from (+ c (* channels sample-index))
-                                     below (+ c (* channels (+ sample-index slice-len)))
-                                     by channels
+                            do (loop for si from slice-start below slice-end by channels
                                      for sample = (aref samples (+ start si))
                                      for predicted = (lms-predict lms)
                                      for residual = (- sample predicted)
