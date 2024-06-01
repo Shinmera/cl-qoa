@@ -1,0 +1,31 @@
+# About cl-qoa
+This is an implementation of the ''Quite OK Audio''(https://qoaformat.org) format, modelled after the reference implementation.
+
+## How To
+First, raw-decode a file from any storage supported by ''binary-structures''(https://shinmera.github.io/binary-structures/), like a stream, file, or raw pointer.
+
+:: common lisp
+(org.shirakumo.qoa:read-file ...)
+::
+
+Now with the file in memory, you can decode it to a sample buffer:
+
+:: common lisp
+(org.shirakumo.qoa:decode *)
+::
+
+It will return the raw ``signed-byte 16`` buffer. You can also use ``decode-to-buffer`` to decode the audio piecemeal. To query the file attributes, you can use ``channels`` and ``samplerate``.
+
+Similarly, you can encode a sample buffer into a QOA file.
+
+:: common lisp
+(org.shirakumo.qoa:encode ...)
+::
+
+Which can then be written out to any supported storage backend again.
+
+:: common lisp
+(org.shirakumo.qoa:write-file * ...)
+::
+
+In both cases, samples are stored interleaved. You can get the channel order for each particular count of channels with the ``channel-layout`` function.
