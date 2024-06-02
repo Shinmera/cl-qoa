@@ -213,7 +213,7 @@
                 :state frame-state
                 :slices frame-slices)))
 
-(defun encode (samples &key (channels 2) (samplerate 44100))
+(defun encode (samples &key (channels 1) (samplerate 44100))
   (check-type samples (simple-array (signed-byte 16) (*)))
   (assert (<= 1 channels MAX-CHANNELS))
   (assert (<= 0 samplerate #xffffff))
