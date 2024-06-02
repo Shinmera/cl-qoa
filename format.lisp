@@ -71,6 +71,9 @@
   (print-unreadable-object (frame stream :type T :identity T)
     (format stream "~d channel~:p @ ~d Hz" (frame-channels frame) (frame-samplerate frame))))
 
+(defmethod octet-size ((frame frame))
+  (bs:octet-size frame))
+
 (bs:define-io-structure file
   "qoaf"
   (samples uint32)
@@ -81,6 +84,9 @@
 
 (defun channels (file)
   (frame-channels (aref (file-frames file) 0)))
+
+(defmethod octet-size ((file file))
+  (bs:octet-size file))
 
 (defmethod print-object ((file file) stream)
   (print-unreadable-object (file stream :type T :identity T)
@@ -112,7 +118,8 @@
     (setf (aref history (1- LMS-LENGTH)) sample)))
 
 (defun div (v scale-factor)
-  (declare (type (signed-byte 32) v scale-factor))
+  (declare (type (signed-byte 32) v))
+  (declare (type (unsigned-byte 16) scale-factor))
   (declare (optimize speed))
   (let* ((reciprocal (aref RECIPROCAL-TABLE scale-factor))
          (n (ash (+ (* v reciprocal) (ash 1 15)) -16)))
@@ -133,6 +140,7 @@
 (declaim (inline clamp-16))
 (defun clamp-16 (v)
   (declare (type (signed-byte 32) v))
+  (declare (optimize speed))
   (if (< 65535 (ldb (byte 32 0) (+ v 32768)))
       (cond ((< v -32768) -32768)
             ((< +32767 v) +32767)
@@ -213,7 +221,7 @@
                 :state frame-state
                 :slices frame-slices)))
 
-(defun encode (samples &key (channels 1) (samplerate 44100))
+(defun encode-from-buffer (samples &key (channels 1) (samplerate 4800))
   (check-type samples (simple-array (signed-byte 16) (*)))
   (assert (<= 1 channels MAX-CHANNELS))
   (assert (<= 0 samplerate #xffffff))
@@ -234,6 +242,18 @@
           do (setf frame-len (clamp FRAME-LENGTH 0 (- (length samples) sample-index)))
              (setf (aref frames frame) (encode-frame samples sample-index state frame-len)))
     (make-file :samples (length samples) :frames frames)))
+
+(defun encode-file (samples output &rest args &key (channels 1) (samplerate 48000) &allow-other-keys)
+  (remf args :channels)
+  (remf args :samplerate)
+  (let ((file (encode-from-buffer samples :channels channels :samplerate samplerate)))
+    (etypecase output
+      ((member vector NIL)
+       (let ((vec (make-array (octet-size file) :element-type '(unsigned-byte 8))))
+         (write-file file vec)
+         vec))
+      ((or string pathname simple-array stream cffi:foreign-pointer)
+       (apply #'write-file file output args)))))
 
 (defun decode-frame (frame samples start end)
   (declare (type (simple-array (signed-byte 16) (*))))
@@ -275,10 +295,14 @@
         while (< end start)
         finally (return (values start frame-start))))
 
-(defun decode (file)
-  (let ((buffer (make-array (file-samples file) :element-type '(signed-byte 16))))
-    (decode-to-buffer file buffer)
-    buffer))
+(defun decode-file (file &rest args)
+  (etypecase file
+    (file
+     (let ((buffer (make-array (file-samples file) :element-type '(signed-byte 16))))
+       (decode-to-buffer file buffer)
+       buffer))
+    (T
+     (decode-file (apply #'read-file file args)))))
 
 (defun channel-layout (count)
   (ecase count

@@ -5,12 +5,14 @@
   (:shadow #:open)
   (:export
    #:file
+   #:octet-size
    #:samplerate
    #:channels
    #:read-file
    #:write-file
-   #:encode
+   #:encode-from-buffer
+   #:encode-file
    #:decode-frame
    #:decode-to-buffer
-   #:decode
+   #:decode-file
    #:channel-layout))

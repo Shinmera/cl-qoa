@@ -17,19 +17,27 @@
   (generate length (constantly 0)))
 
 (defun wav-samples (file)
-  )
+  (with-open-file (stream file :element-type '(unsigned-byte 8))
+    (dotimes (i 12) (read-byte stream))
+    (loop for label = (map-into (make-string 4) (lambda () (code-char (read-byte stream))))
+          for length = (nibbles:read-ub32/le stream)
+          do (if (string= "data" label)
+                 (let ((samples (make-array (truncate length 2) :element-type '(signed-byte 16))))
+                   (nibbles:read-sb16/be-into-sequence samples stream)
+                   (return samples))
+                 (dotimes (i length) (read-byte stream))))))
 
-(define-test trivial-en/decode
+(define-test silence
   :parent qoa
-  (finish (qoa:encode (silence)))
-  (finish (qoa:decode (qoa:encode (silence))))
-  (is equalp (silence) (qoa:decode (qoa:encode (silence)))))
+  (finish (qoa:encode-from-buffer (silence)))
+  (finish (qoa:decode-file (qoa:encode-from-buffer (silence))))
+  (is equalp (silence) (qoa:decode-file (qoa:encode-from-buffer (silence)))))
 
 (define-test samples
   :parent qoa
-  (dolist (encoded (directory (make-pathname :name :wild :type "qoa" :defaults *samples-directory*)))
-    (let ((source (wav-samples (make-pathname :type "wav" :defaults encoded)))
-          (decoded (wav-samples (make-pathname :name (format NIL "~a.qoa" (pathname-name source)) :defaults source)))
-          (encoded (alexandria:read-file-into-byte-vector encoded)))
-      (is equalp encoded (qoa:write-file (qoa:encode source) 'vector))
-      (is equalp decoded (qoa:decode (qoa:read-file encoded))))))
+  (dolist (file (directory (make-pathname :name :wild :type "qoa" :defaults *samples-directory*)))
+    (let ((source (wav-samples (make-pathname :type "wav" :defaults file)))
+          (decoded (wav-samples (make-pathname :type "wav" :name (format NIL "~a.qoa" (pathname-name file)) :defaults file)))
+          (encoded (alexandria:read-file-into-byte-vector file)))
+      (is equalp encoded (qoa:encode-file source 'vector))
+      (is equalp decoded (qoa:decode-file encoded)))))
