@@ -44,8 +44,8 @@
 
 ;; TODO: should change this to be a single sint16 array instead to avoid the pointerage
 (bs:define-io-structure (lms (:copier NIL) (:predicate NIL))
-  (history (vector sint16 #.LMS-LENGTH))
-  (weights (vector sint16 #.LMS-LENGTH)))
+  (history (vector sint16-be #.LMS-LENGTH))
+  (weights (vector sint16-be #.LMS-LENGTH)))
 
 (defun copy-lms (lms)
   (make-lms :history (copy-seq (lms-history lms))
@@ -61,11 +61,11 @@
 
 (bs:define-io-structure frame
   (channels uint8)
-  (samplerate uint24)
-  (samples/channel uint16)
-  (size uint16)
+  (samplerate uint24-be)
+  (samples/channel uint16-be)
+  (size uint16-be)
   (state (vector lms (bs:slot channels)))
-  (slices (vector uint64 (* 256 (bs:slot channels)))))
+  (slices (vector uint64-be (* 256 (bs:slot channels)))))
 
 (defmethod print-object ((frame frame) stream)
   (print-unreadable-object (frame stream :type T :identity T)
@@ -76,7 +76,7 @@
 
 (bs:define-io-structure file
   "qoaf"
-  (samples uint32)
+  (samples uint32-be)
   (frames (vector frame (ceiling (bs:slot samples) (* 256 20)))))
 
 (defun samplerate (file)
