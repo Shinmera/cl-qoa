@@ -65,7 +65,7 @@
   (samples/channel uint16-be)
   (size uint16-be)
   (state (vector lms (bs:slot channels)))
-  (slices (vector uint64-be (* 256 (bs:slot channels)))))
+  (slices (vector uint64-be (* (truncate (+ (bs:slot samples/channel) SLICE-LENGTH -1) SLICE-LENGTH) (bs:slot channels)))))
 
 (defmethod print-object ((frame frame) stream)
   (print-unreadable-object (frame stream :type T :identity T)
