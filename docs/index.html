@@ -1,0 +1,178 @@
+<!DOCTYPE html> <html lang="EN"> <head> <meta charset="utf-8"> <title>Cl Qoa</title> <style>html body{margin:0 auto 0 auto;padding:20px;max-width:1024px;font-family:sans-serif;font-size:14pt;overflow-y:scroll;}html body a{text-decoration:none;}html body a[href]{color:#0055AA;}html body a[href]:hover{color:#0088EE;}html body pre{background:#FAFAFA;border:1px solid #DDDDDD;padding:0.75em;overflow-x:auto;}html body pre >code a[href]{color:#223388;}article.project h1{font-size:1.7em;}article.project h1,article.project h2,article.project h3,article.project h4,article.project h5,article.project h6{margin:0.2em 0 0.1em 0;text-indent:1em;}article.project >header{text-align:center;}article.project >header img.logo{display:block;margin:auto;max-height:170px;}article.project >header h1{display:inline-block;text-indent:0;font-size:2.5em;}article.project >header .version{vertical-align:bottom;}article.project >header .languages{margin-top:-0.5em;text-transform:capitalize;}article.project >header .description{margin:0;}article.project >header .pages{margin-top:0.5em;font-size:1.2em;text-transform:capitalize;}article.project >header .pages a{display:inline-block;padding:0 0.2em;}article.project >section{margin:1em 0 1em 0;}article.project >section img{max-width:100%;}article.project #index >ul{list-style:none;margin:0;padding:0;}article.project .row label{display:inline-block;min-width:8em;}article.project #system .row{display:flex;}article.project #system #dependencies{display:inline;margin:0;padding:0;}article.project #system #dependencies li{display:inline;padding:0 0.2em;}article.project #system #author label{vertical-align:top;}article.project #system #author ul{display:inline-block;margin:0;padding:0;list-style:none;}article.definition{margin:1em 0 0 0;}article.definition >header h1,article.definition >header h2,article.definition >header h3,article.definition >header h4,article.definition >header h5,article.definition >header h6{text-indent:0;display:inline-block;}article.definition >header ul{display:inline-block;list-style:none;margin:0;padding:0;}article.definition >header ul li{display:inline-block;padding:0 0.2em 0 0;}article.definition >header .visibility{display:none;}article.definition >header .visibility,article.definition >header .type{text-transform:lowercase;}article.definition >header .source-link{visibility:hidden;float:right;}article.definition >header .source-link:after{visibility:visible;content:"[SRC]";}article.definition .docstring{margin:0 0 0 1em;}article.definition .docstring pre{font-size:0.8em;white-space:pre-wrap;}.definition.package >header ul.nicknames{display:inline-block;list-style:none;margin:0;padding:0 0 0 1em;}.definition.package >header ul.nicknames li{display:inline;}.definition.package >header ul.nicknames:before{content:"(";}.definition.package >header ul.nicknames:after{content:")";}.definition.package ul.definitions{margin:0;list-style:none;padding:0 0 0 0.5em;}.definition.callable >header .name:before,.definition.type >header .name:before{content:"(";font-weight:normal;}.definition.callable >header .arguments:after,.definition.type >header .arguments:after{content:")";}.definition.callable >header .arguments .arguments:before,.definition.type >header .arguments .arguments:before{content:"(";}.definition.callable >header .arguments .argument,.definition.type >header .arguments .argument{padding:0;}.definition.callable >header .arguments .argument.lambda-list-keyword,.definition.type >header .arguments .argument.lambda-list-keyword{color:#991155;}.definition li>mark{background:none;border-left:0.3em solid #0088EE;padding-left:0.3em;display:block;}</style> </head> <body> <article class="project"> <header>   <h1>cl qoa</h1>   <span class="version">1.0.0</span>    <p class="description">An implementation of the Quite Okay Audio format.</p>   </header> <section id="documentation"><article><h1 id="about cl-qoa">About cl-qoa</h1><p>This is an implementation of the <a class="external-link" href="https://qoaformat.org">Quite OK Audio</a> format, modelled after the reference implementation.</p><h2 id="how to">How To</h2><p>First, raw-decode a file from any storage supported by <a class="external-link" href="https://shinmera.github.io/binary-structures/">binary-structures</a>, like a stream, file, or raw pointer.</p><code style="display:block" class="code-block" data-language="common lisp"><pre>(<a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3AREAD-FILE" class="xref">org.shirakumo.qoa:read-file</a> file)</pre></code><p>Now with the file in memory, you can decode it to a sample buffer:</p><code style="display:block" class="code-block" data-language="common lisp"><pre>(<a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ADECODE-FILE" class="xref">org.shirakumo.qoa:decode-file</a> <a href="http://l1sp.org/cl/%2A" class="xref">*</a>)</pre></code><p>It will return the raw <code>signed-byte 16</code> buffer. You can also use <code><a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ADECODE-TO-BUFFER" class="xref">decode-to-buffer</a></code> to decode the audio piecemeal. To query the file attributes, you can use <code><a href="#GENERIC-FUNCTION%20ORG.SHIRAKUMO.QOA%3ACHANNELS" class="xref">channels</a></code> and <code><a href="#GENERIC-FUNCTION%20ORG.SHIRAKUMO.QOA%3ASAMPLERATE" class="xref">samplerate</a></code>.</p><p>Similarly, you can encode a sample buffer into a QOA file.</p><code style="display:block" class="code-block" data-language="common lisp"><pre>(<a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3AENCODE-FROM-BUFFER" class="xref">org.shirakumo.qoa:encode-from-buffer</a> samples)</pre></code><p>Which can then be written out to any supported storage backend again.</p><code style="display:block" class="code-block" data-language="common lisp"><pre>(<a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3AWRITE-FILE" class="xref">org.shirakumo.qoa:write-file</a> <a href="http://l1sp.org/cl/%2A" class="xref">*</a> file)</pre></code><p>In both cases, samples are stored interleaved. You can get the channel order for each particular count of channels with the <code><a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ACHANNEL-LAYOUT" class="xref">channel-layout</a></code> function.</p><p>If you just need to convert a WAV file, you can use the <code><a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ACONVERT-WAV" class="xref">convert-wav</a></code> function. It requires the samples to be in SINT16 format and will error on any other format. If you need to convert samplerates or sample format, you can use a tool like ffmpeg to pre-convert it.</p><code style="display:block" class="code-block" data-language="common lisp"><pre>(let ((path &quot;myfile.wav&quot;))
+  (uiop:run-program (<a href="http://l1sp.org/cl/list" class="xref">list</a> &quot;ffmpeg&quot; &quot;-i&quot; (uiop:native-namestring path)
+                          &quot;-c:a&quot; &quot;pcm_s16le&quot; &quot;-y&quot; (uiop:native-namestring path)))
+  (<a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ACONVERT-WAV" class="xref">org.shirakumo.qoa:convert-wav</a> path))</pre></code></article></section>   <section id="system"> <h2>System Information</h2>  <div class="row"> <label for="version">Version:</label> <a id="version">1.0.0</a> </div>   <div class="row"> <label for="dependencies">Dependencies:</label> <ul id="dependencies"><li><a class="external" href="https://Shinmera.github.io/documentation-utils/">documentation-utils</a></li><li><a class="external" href="https://shinmera.github.io/binary-structures/">binary-structures</a></li></ul> </div>   <div class="row" id="author"> <label for="author">Author:</label> <a href="mailto:shinmera@tymoon.eu">Yukari Hafner</a> </div>   <div class="row"> <label for="license">License:</label> <a id="license" href="https://tldrlegal.com/search?q=zlib">zlib</a> </div>   <div class="row"> <label for="homepage">Homepage:</label> <a id="homepage" href="https://shinmera.github.io/cl-qoa/">https://shinmera.github.io/cl-qoa/</a> </div>   <div class="row"> <label for="bug-tracker">Bug Tracker:</label> <a id="bug-tracker" href="https://github.com/shinmera/cl-qoa/issues">https://github.com/shinmera/cl-qoa/issues</a> </div>   <div class="row"> <label for="sources">Sources:</label> <a id="sources" href="https://github.com/shinmera/cl-qoa.git">https://github.com/shinmera/cl-qoa.git</a> </div>  </section>    <section id="index"> <h2>Definition Index</h2> <ul> <li> <article class="definition package" id="PACKAGE ORG.SHIRAKUMO.QOA"> <header> <h3> <a href="#PACKAGE%20ORG.SHIRAKUMO.QOA">ORG.SHIRAKUMO.QOA</a> </h3> <ul class="nicknames"></ul>  </header> <div class="docstring"><i>No documentation provided.</i></div> <ul class="definitions"> <li> <article class="definition structure" id="STRUCTURE ORG.SHIRAKUMO.QOA:FILE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">STRUCTURE</span> <h4 class="name"> <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFILE">FILE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"></ul>  <a class="source-link" href="https://github.com/shinmera/cl-qoa/blob/0f1d2c4498440247b4b65ba55d9b444368143da6/format.lisp#L86">Source</a>  </header> <div class="docstring"><pre>Representation of an encoded QOA file.
+
+QOA files contain PCM-encoded audio with a 16-bit signed integer
+representation. Each file is composed out of multiple frames of
+encoded data, with possibly variable numbers of channels and
+samplerates per frame, though this is not typically the case.
+
+See <a href="#GENERIC-FUNCTION%20ORG.SHIRAKUMO.QOA%3AOCTET-SIZE" class="xref">OCTET-SIZE</a>
+See <a href="#GENERIC-FUNCTION%20ORG.SHIRAKUMO.QOA%3AFRAMES" class="xref">FRAMES</a>
+See <a href="#GENERIC-FUNCTION%20ORG.SHIRAKUMO.QOA%3ASAMPLERATE" class="xref">SAMPLERATE</a>
+See <a href="#GENERIC-FUNCTION%20ORG.SHIRAKUMO.QOA%3ACHANNELS" class="xref">CHANNELS</a>
+See <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3AREAD-FILE" class="xref">READ-FILE</a>
+See <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3AWRITE-FILE" class="xref">WRITE-FILE</a>
+See <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3AENCODE-FILE" class="xref">ENCODE-FILE</a>
+See <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3AENCODE-FROM-BUFFER" class="xref">ENCODE-FROM-BUFFER</a>
+See <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ADECODE-FRAME" class="xref">DECODE-FRAME</a>
+See <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ADECODE-TO-BUFFER" class="xref">DECODE-TO-BUFFER</a></pre></div> </article> </li>  <li> <article class="definition structure" id="STRUCTURE ORG.SHIRAKUMO.QOA:FRAME"> <header> <span class="visibility">EXTERNAL</span> <span class="type">STRUCTURE</span> <h4 class="name"> <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFRAME">FRAME</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"></ul>  <a class="source-link" href="https://github.com/shinmera/cl-qoa/blob/0f1d2c4498440247b4b65ba55d9b444368143da6/format.lisp#L64">Source</a>  </header> <div class="docstring"><pre>Representation of an audio frame as part of a QOA file.
+
+A frame contains the encoding of the sample data, a LMS state buffer,
+and an array of encoded audio slices.
+
+See <a href="#GENERIC-FUNCTION%20ORG.SHIRAKUMO.QOA%3AOCTET-SIZE" class="xref">OCTET-SIZE</a>
+See <a href="#GENERIC-FUNCTION%20ORG.SHIRAKUMO.QOA%3ASAMPLERATE" class="xref">SAMPLERATE</a>
+See <a href="#GENERIC-FUNCTION%20ORG.SHIRAKUMO.QOA%3ACHANNELS" class="xref">CHANNELS</a>
+See <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ADECODE-FRAME" class="xref">DECODE-FRAME</a>
+See <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFILE" class="xref">FILE (type)</a></pre></div> </article> </li>  <li> <article class="definition function callable" id="FUNCTION ORG.SHIRAKUMO.QOA:CHANNEL-LAYOUT"> <header> <span class="visibility">EXTERNAL</span> <span class="type">FUNCTION</span> <h4 class="name"> <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ACHANNEL-LAYOUT">CHANNEL-LAYOUT</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments">  <li class="argument">COUNT</li>  </ul>  <a class="source-link" href="https://github.com/shinmera/cl-qoa/blob/0f1d2c4498440247b4b65ba55d9b444368143da6/format.lisp#L352">Source</a>  </header> <div class="docstring"><pre>Returns the layout of the channels within the packed sample buffer for a given channel count.
+
+The following speaker types are provided:
+  :center :left :right :left-front :right-front :subwoofer :left-rear
+  :right-rear :left-side :right-side</pre></div> </article> </li>  <li> <article class="definition function callable" id="FUNCTION ORG.SHIRAKUMO.QOA:CONVERT-WAV"> <header> <span class="visibility">EXTERNAL</span> <span class="type">FUNCTION</span> <h4 class="name"> <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ACONVERT-WAV">CONVERT-WAV</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments">  <li class="argument">IN</li>    <li class="argument lambda-list-keyword">&amp;KEY</li>    <li class="argument">OUT</li>    <li class="argument">IF-EXISTS</li>  </ul>  <a class="source-link" href="https://github.com/shinmera/cl-qoa/blob/0f1d2c4498440247b4b65ba55d9b444368143da6/format.lisp#L347">Source</a>  </header> <div class="docstring"><pre>Converts a wav file to a QOA file.
+
+IN should be the path to a RIFF WAVE file with sint16_le encoded audio
+samples to convert. OUT should be the path to which the QOA file
+should be written.
+
+Returns OUT.
+
+If the source file is not a wave file or does not contain the correct
+sample format, an error is signalled.
+
+See <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3AENCODE-FILE" class="xref">ENCODE-FILE</a></pre></div> </article> </li>  <li> <article class="definition function callable" id="FUNCTION ORG.SHIRAKUMO.QOA:DECODE-FILE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">FUNCTION</span> <h4 class="name"> <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ADECODE-FILE">DECODE-FILE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments">  <li class="argument">FILE</li>    <li class="argument lambda-list-keyword">&amp;REST</li>    <li class="argument">ARGS</li>  </ul>  <a class="source-link" href="https://github.com/shinmera/cl-qoa/blob/0f1d2c4498440247b4b65ba55d9b444368143da6/format.lisp#L314">Source</a>  </header> <div class="docstring"><pre>Decodes a QOA file to a sample buffer.
+
+Returns three values:
+  The sample buffer,
+  The number of channels of audio,
+  The samplerate of the audio.
+
+This assumes that the entire file has a constant channel count and
+samplerate.
+
+See <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ADECODE-TO-BUFFER" class="xref">DECODE-TO-BUFFER</a>
+See <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ADECODE-FILE" class="xref">DECODE-FILE</a></pre></div> </article> </li>  <li> <article class="definition function callable" id="FUNCTION ORG.SHIRAKUMO.QOA:DECODE-FRAME"> <header> <span class="visibility">EXTERNAL</span> <span class="type">FUNCTION</span> <h4 class="name"> <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ADECODE-FRAME">DECODE-FRAME</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments">  <li class="argument">FRAME</li>    <li class="argument">SAMPLES</li>    <li class="argument">START</li>    <li class="argument">END</li>  </ul>  <a class="source-link" href="https://github.com/shinmera/cl-qoa/blob/0f1d2c4498440247b4b65ba55d9b444368143da6/format.lisp#L269">Source</a>  </header> <div class="docstring"><pre>Decodes a single audio frame to a raw sample buffer.
+
+FRAME must be a FRAME instance, SAMPLES must be a
+(SIMPLE-ARRAY (SIGNED-BYTE 16) (*)) and START and END must be indices
+into the SAMPLES array denoting the region to fill.
+
+Returns the index into the SAMPLES array up to which samples were
+written, same as CL:READ-SEQUENCE.
+
+If the sample buffer is not big enough to contain the entire frame,
+START is returned.
+
+See <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFRAME" class="xref">FRAME (type)</a></pre></div> </article> </li>  <li> <article class="definition function callable" id="FUNCTION ORG.SHIRAKUMO.QOA:DECODE-TO-BUFFER"> <header> <span class="visibility">EXTERNAL</span> <span class="type">FUNCTION</span> <h4 class="name"> <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ADECODE-TO-BUFFER">DECODE-TO-BUFFER</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments">  <li class="argument">FILE</li>    <li class="argument">SAMPLES</li>    <li class="argument lambda-list-keyword">&amp;KEY</li>    <li class="argument">FRAME-START</li>    <li class="argument">START</li>    <li class="argument">END</li>  </ul>  <a class="source-link" href="https://github.com/shinmera/cl-qoa/blob/0f1d2c4498440247b4b65ba55d9b444368143da6/format.lisp#L301">Source</a>  </header> <div class="docstring"><pre>Decodes the entire FILE to a raw sample buffer.
+
+FILE must be a FILE, SAMPLES must be a
+(SIMPLE-ARRAY (SIGNED-BYTE 16) (*)) and START and END must be indices
+into the SAMPLES array denoting the region to fill. FRAME-START can
+designate the first frame of the file that should be decoded.
+
+Returns the index into the SAMPLES array up to which samples were
+written, same as CL:READ-SEQUENCE, as well as the index of the next
+frame to be decoded.
+
+This assumes that the entire file has a constant channel count and
+samplerate.
+
+See <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFILE" class="xref">FILE (type)</a>
+See <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3ADECODE-FRAME" class="xref">DECODE-FRAME</a></pre></div> </article> </li>  <li> <article class="definition function callable" id="FUNCTION ORG.SHIRAKUMO.QOA:ENCODE-FILE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">FUNCTION</span> <h4 class="name"> <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3AENCODE-FILE">ENCODE-FILE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments">  <li class="argument">SAMPLES</li>    <li class="argument">OUTPUT</li>    <li class="argument lambda-list-keyword">&amp;REST</li>    <li class="argument">ARGS</li>    <li class="argument lambda-list-keyword">&amp;KEY</li>    <li class="argument">CHANNELS</li>    <li class="argument">SAMPLERATE</li>    <li class="argument lambda-list-keyword">&amp;ALLOW-OTHER-KEYS</li>  </ul>  <a class="source-link" href="https://github.com/shinmera/cl-qoa/blob/0f1d2c4498440247b4b65ba55d9b444368143da6/format.lisp#L257">Source</a>  </header> <div class="docstring"><pre>Encode a sample buffer and write it to storage immediately.
+
+OUTPUT may be a storage backend supported by WRITE-FILE, or the symbol
+VECTOR, in which case a vector of sufficient size is allocated for you
+and returned.
+
+See <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFILE" class="xref">FILE (type)</a>
+See <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3AENCODE-FROM-BUFFER" class="xref">ENCODE-FROM-BUFFER</a>
+See <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3AWRITE-FILE" class="xref">WRITE-FILE</a></pre></div> </article> </li>  <li> <article class="definition function callable" id="FUNCTION ORG.SHIRAKUMO.QOA:ENCODE-FROM-BUFFER"> <header> <span class="visibility">EXTERNAL</span> <span class="type">FUNCTION</span> <h4 class="name"> <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3AENCODE-FROM-BUFFER">ENCODE-FROM-BUFFER</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments">  <li class="argument">SAMPLES</li>    <li class="argument lambda-list-keyword">&amp;KEY</li>    <li class="argument">CHANNELS</li>    <li class="argument">SAMPLERATE</li>  </ul>  <a class="source-link" href="https://github.com/shinmera/cl-qoa/blob/0f1d2c4498440247b4b65ba55d9b444368143da6/format.lisp#L233">Source</a>  </header> <div class="docstring"><pre>Creates a FILE from a buffer of audio samples.
+
+SAMPLES must be a (SIMPLE-ARRAY (SIGNED-BYTE 16) (*)), CHANNELS should
+be within [1,8], and SAMPLERATE within [1,16777215].
+
+Returns a fresh FILE instance.
+
+See <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFILE" class="xref">FILE (type)</a></pre></div> </article> </li>  <li> <article class="definition function callable" id="FUNCTION ORG.SHIRAKUMO.QOA:READ-FILE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">FUNCTION</span> <h4 class="name"> <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3AREAD-FILE">READ-FILE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments">  <li class="argument">STORAGE</li>    <li class="argument lambda-list-keyword">&amp;REST</li>    <li class="argument">ARGS</li>  </ul>  <a class="source-link" href="https://github.com/shinmera/cl-qoa/blob/0f1d2c4498440247b4b65ba55d9b444368143da6/format.lisp#L86">Source</a>  </header> <div class="docstring"><pre>Reads a QOA file from its binary representation.
+
+The STORAGE may be any storage backend supported by binary-structures.
+
+Returns a fresh FILE instance as well as the index at which reading
+stopped, if applicable.
+
+See <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFILE" class="xref">FILE (type)</a></pre></div> </article> </li>  <li> <article class="definition function callable" id="FUNCTION ORG.SHIRAKUMO.QOA:WRITE-FILE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">FUNCTION</span> <h4 class="name"> <a href="#FUNCTION%20ORG.SHIRAKUMO.QOA%3AWRITE-FILE">WRITE-FILE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments">  <li class="argument">VALUE</li>    <li class="argument">STORAGE</li>    <li class="argument lambda-list-keyword">&amp;REST</li>    <li class="argument">ARGS</li>  </ul>  <a class="source-link" href="https://github.com/shinmera/cl-qoa/blob/0f1d2c4498440247b4b65ba55d9b444368143da6/format.lisp#L86">Source</a>  </header> <div class="docstring"><pre>Writes a QOA file to its binary representation.
+
+The STORAGE may be any storage backend supported by binary-structures.
+It must have enough space available to contain the entire file. To
+check this beforehand, you can call OCTET-SIZE.
+
+Returns the index at which writing stopped.
+
+See <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFILE" class="xref">FILE (type)</a>
+See <a href="#GENERIC-FUNCTION%20ORG.SHIRAKUMO.QOA%3AOCTET-SIZE" class="xref">OCTET-SIZE</a></pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION ORG.SHIRAKUMO.QOA:CHANNELS"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20ORG.SHIRAKUMO.QOA%3ACHANNELS">CHANNELS</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments">  <li class="argument">FRAME</li>  </ul>  </header> <div class="docstring"><pre>Returns the number of channels of the file or frame.
+
+See <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFILE" class="xref">FILE (type)</a>
+See <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFRAME" class="xref">FRAME (type)</a></pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION ORG.SHIRAKUMO.QOA:FRAMES"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20ORG.SHIRAKUMO.QOA%3AFRAMES">FRAMES</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments">  <li class="argument">FILE</li>  </ul>  </header> <div class="docstring"><pre>Returns the vector of FRAME instances of the FILE
+
+See <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFILE" class="xref">FILE (type)</a>
+See <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFRAME" class="xref">FRAME (type)</a></pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION ORG.SHIRAKUMO.QOA:OCTET-SIZE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20ORG.SHIRAKUMO.QOA%3AOCTET-SIZE">OCTET-SIZE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments">  <li class="argument">FRAME</li>  </ul>  </header> <div class="docstring"><pre>Returns the octet-size of the QOA file or frame if it were written out.
+
+See <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFILE" class="xref">FILE (type)</a>
+See <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFRAME" class="xref">FRAME (type)</a></pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION ORG.SHIRAKUMO.QOA:SAMPLERATE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20ORG.SHIRAKUMO.QOA%3ASAMPLERATE">SAMPLERATE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments">  <li class="argument">FRAME</li>  </ul>  </header> <div class="docstring"><pre>Returns the samplerate of the file or frame in Herz.
+
+See <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFILE" class="xref">FILE (type)</a>
+See <a href="#STRUCTURE%20ORG.SHIRAKUMO.QOA%3AFRAME" class="xref">FRAME (type)</a></pre></div> </article> </li> </ul> </article> </li> </ul> </section>  </article> <script>window.addEventListener("DOMContentLoaded", function(){
+    var unmarkElement = function(el){
+        if(el.tagName === "mark" || el.tagName === "MARK"){
+            [].forEach.call(el.childNodes, function(child){
+                el.parentNode.insertBefore(child, el);
+            });
+            el.parentNode.removeChild(el);
+        }else if(el.parentNode.tagName === "mark"){
+            return unmarkElement(el.parentNode);
+        }
+        return null;
+    }
+
+    var unmarkAll = function(root){
+        root = root || document;
+        [].forEach.call(root.querySelectorAll("mark"), unmarkElement);
+    }
+    
+    var markElement = function(el){
+        if(el.parentNode.tagName === "mark" || el.parentNode.tagName === "MARK"){
+            return el.parentNode;
+        } else {
+            unmarkAll();
+            var marked = document.createElement("mark");
+            el.parentNode.insertBefore(marked, el);
+            marked.appendChild(el);
+            return marked;
+        }
+    }
+
+    var markFragmented = function(){
+        if(window.location.hash){
+            var el = document.getElementById(decodeURIComponent(window.location.hash.substr(1)));
+            if(el) markElement(el);
+        }
+    }
+
+    var registerXrefLink = function(link){
+        var el = document.getElementById(decodeURIComponent(link.getAttribute("href").substr(1)));
+        if(el){
+            link.addEventListener("click", function(){
+                markElement(el);
+            });
+        }
+    }
+
+    var registerXrefLinks = function(root){
+        root = root || document;
+        [].forEach.call(root.querySelectorAll("a.xref"), registerXrefLink);
+    }
+
+    markFragmented();
+    registerXrefLinks();
+}); </script> </body> </html> 
