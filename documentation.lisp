@@ -126,9 +126,10 @@ See FRAME (type)")
     "Decodes the entire FILE to a raw sample buffer.
 
 FILE must be a FILE, SAMPLES must be a
-\(SIMPLE-ARRAY (SIGNED-BYTE 16) (*)) and START and END must be indices
-into the SAMPLES array denoting the region to fill. FRAME-START can
-designate the first frame of the file that should be decoded.
+\(SIMPLE-ARRAY (SIGNED-BYTE 16) (*)) or a CFFI:FOREIGN-POINTER and
+START and END must be indices into the SAMPLES array denoting the
+region to fill. FRAME-START can designate the first frame of the file
+that should be decoded.
 
 Returns the index into the SAMPLES array up to which samples were
 written, same as CL:READ-SEQUENCE, as well as the index of the next
