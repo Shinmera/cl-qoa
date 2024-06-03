@@ -24,7 +24,7 @@
           for length = (nibbles:read-ub32/le stream)
           do (if (string= "data" label)
                  (let ((samples (make-array (truncate length 2) :element-type '(signed-byte 16))))
-                   (nibbles:read-sb16/be-into-sequence samples stream)
+                   (nibbles:read-sb16/le-into-sequence samples stream)
                    (return samples))
                  (dotimes (i length) (read-byte stream))))))
 

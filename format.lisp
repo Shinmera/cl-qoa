@@ -165,10 +165,11 @@
   (declare (type (simple-array (signed-byte 16) (*)) samples))
   (declare (type state state))
   (let* ((channels (state-channels state))
-         (slices (truncate (+ frame-len -1 SLICE-LENGTH) SLICE-LENGTH))
+         (slices (truncate (+ frame-len SLICE-LENGTH -1) SLICE-LENGTH))
          (frame-size (compute-frame-size channels slices))
-         (prev-scale-factor (make-array 256 :element-type '(signed-byte 32)))
-         (frame-state (state-lms state))
+         (prev-scale-factor (make-array MAX-CHANNELS :element-type '(signed-byte 32) :initial-element 0))
+         (state-lms (state-lms state))
+         (frame-state (map-into (make-array channels) #'copy-lms state-lms))
          (frame-slices (make-array slices :element-type '(unsigned-byte 64))))
     (declare (dynamic-extent prev-scale-factor))
     (loop with p = 0
@@ -183,7 +184,7 @@
                    for best-scale-factor = 0
                    do (loop for sfi from 0 below 16
                             for scale-factor = (mod (+ sfi (aref prev-scale-factor c)) 16)
-                            for lms = (copy-lms (aref (state-lms state) c))
+                            for lms = (copy-lms (aref state-lms c))
                             for slice = scale-factor
                             for current-rank = 0
                             do (loop for si from slice-start below slice-end by channels
@@ -210,8 +211,8 @@
                                  (setf best-lms lms)
                                  (setf best-scale-factor scale-factor)))
                       (setf (aref prev-scale-factor c) best-scale-factor)
-                      (setf (aref frame-state c) best-lms)
-                      (setf best-slice (ash best-slice (- (* 3 (- SLICE-LENGTH slice-len)))))
+                      (setf (aref state-lms c) best-lms)
+                      (setf best-slice (ash best-slice (* (- SLICE-LENGTH slice-len) 3)))
                       (setf (aref frame-slices p) best-slice)
                       (incf p)))
     (make-frame :channels (state-channels state)
@@ -237,10 +238,12 @@
         (dotimes (i LMS-LENGTH)
           (setf (aref (lms-history lms) i) 0))))
     (loop with frame-len = FRAME-LENGTH
+          with sample-index = 0
           for frame from 0
-          for sample-index from 0 below (length samples) by frame-len
+          while (< sample-index (length samples))
           do (setf frame-len (clamp FRAME-LENGTH 0 (- (length samples) sample-index)))
-             (setf (aref frames frame) (encode-frame samples sample-index state frame-len)))
+             (setf (aref frames frame) (encode-frame samples sample-index state frame-len))
+             (incf sample-index (* channels frame-len)))
     (make-file :samples (length samples) :frames frames)))
 
 (defun encode-file (samples output &rest args &key (channels 1) (samplerate 48000) &allow-other-keys)
