@@ -5,6 +5,8 @@
   (:shadow #:open)
   (:export
    #:file
+   #:frame
+   #:frames
    #:octet-size
    #:samplerate
    #:channels

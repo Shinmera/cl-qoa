@@ -77,15 +77,24 @@
 (defmethod octet-size ((frame frame))
   (bs:octet-size frame))
 
+(defmethod samplerate ((frame frame))
+  (frame-samplerate frame))
+
+(defmethod channels ((frame frame))
+  (frame-channels frame))
+
 (bs:define-io-structure file
   "qoaf"
   (samples uint32-be)
   (frames (vector frame (ceiling (bs:slot samples) (* 256 20)))))
 
-(defun samplerate (file)
+(defmethod frames ((file file))
+  (file-frames file))
+
+(defmethod samplerate ((file file))
   (frame-samplerate (aref (file-frames file) 0)))
 
-(defun channels (file)
+(defmethod channels ((file file))
   (frame-channels (aref (file-frames file) 0)))
 
 (defmethod octet-size ((file file))
@@ -224,7 +233,7 @@
 (defun encode-from-buffer (samples &key (channels 1) (samplerate 4800))
   (check-type samples (simple-array (signed-byte 16) (*)))
   (assert (<= 1 channels MAX-CHANNELS))
-  (assert (<= 0 samplerate #xffffff))
+  (assert (<= 1 samplerate #xffffff))
   (let* ((state (make-state :channels channels :samplerate samplerate :samples (length samples)))
          (frames (make-array (truncate (+ (length samples) -1 FRAME-LENGTH) FRAME-LENGTH))))
     (declare (dynamic-extent state))
@@ -307,7 +316,7 @@
     (file
      (let ((buffer (make-array (file-samples file) :element-type '(signed-byte 16))))
        (decode-to-buffer file buffer)
-       buffer))
+       (values buffer (channels file) (samplerate file))))
     (T
      (decode-file (apply #'read-file file args)))))
 
@@ -335,9 +344,9 @@
                        (T
                         (dotimes (i length) (read-byte stream)))))))))
 
-(defun convert-wav (in &optional (out (make-pathname :type "qoa" :defaults in)))
+(defun convert-wav (in &key (out (make-pathname :type "qoa" :defaults in)) (if-exists :error))
   (multiple-value-bind (samples channels samplerate) (wav-samples in)
-    (encode-file samples out :channels channels :samplerate samplerate)
+    (encode-file samples out :channels channels :samplerate samplerate :if-exists if-exists)
     out))
 
 (defun channel-layout (count)
