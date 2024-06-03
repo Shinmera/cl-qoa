@@ -29,3 +29,11 @@ Which can then be written out to any supported storage backend again.
 ::
 
 In both cases, samples are stored interleaved. You can get the channel order for each particular count of channels with the ``channel-layout`` function.
+
+If you just need to convert a WAV file, you can use the ``convert-wav`` function. It requires the samples to be in SINT16 format and will error on any other format. If you need to convert samplerates or sample format, you can use a tool like ffmpeg to pre-convert it.
+
+:: common lisp
+(let ((path "myfile.wav"))
+  (uiop:run-program (list "ffmpeg" "-i" (uiop:native-namestring path) "-c:a" "pcm_s16le" "-y" (uiop:native-namestring path)))
+  (org.shirakumo.qoa:convert-wav path))
+::

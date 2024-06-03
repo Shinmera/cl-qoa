@@ -337,7 +337,8 @@
 
 (defun convert-wav (in &optional (out (make-pathname :type "qoa" :defaults in)))
   (multiple-value-bind (samples channels samplerate) (wav-samples in)
-    (encode-file samples out :channels channels :samplerate samplerate)))
+    (encode-file samples out :channels channels :samplerate samplerate)
+    out))
 
 (defun channel-layout (count)
   (ecase count
