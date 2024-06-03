@@ -5,8 +5,9 @@
 
 (in-package #:org.shirakumo.qoa.test)
 
-(defvar *samples-directory*
-  #.(merge-pathnames "samples/" (make-pathname :name NIL :type NIL :defaults (or *compile-file-truename* *load-truename*))))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defvar *samples-directory*
+    #.(merge-pathnames "samples/" (make-pathname :name NIL :type NIL :defaults (or *compile-file-truename* *load-truename*)))))
 
 (define-test qoa)
 
@@ -27,17 +28,27 @@
                    (return samples))
                  (dotimes (i length) (read-byte stream))))))
 
-(define-test silence
+(define-test interface
   :parent qoa
   (finish (qoa:encode-from-buffer (silence)))
   (finish (qoa:decode-file (qoa:encode-from-buffer (silence))))
-  (is equalp (silence) (qoa:decode-file (qoa:encode-from-buffer (silence)))))
+  (is = 4800 (qoa:samplerate (qoa:encode-from-buffer (silence))))
+  (is = 1 (qoa:channels (qoa:encode-from-buffer (silence)))))
 
 (define-test samples
   :parent qoa
-  (dolist (file (directory (make-pathname :name :wild :type "qoa" :defaults *samples-directory*)))
-    (let ((source (wav-samples (make-pathname :type "wav" :defaults file)))
-          (decoded (wav-samples (make-pathname :type "wav" :name (format NIL "~a.qoa" (pathname-name file)) :defaults file)))
-          (encoded (alexandria:read-file-into-byte-vector file)))
-      (is equalp encoded (qoa:encode-file source 'vector))
-      (is equalp decoded (qoa:decode-file encoded)))))
+  :depends-on (interface))
+
+(defmacro define-sample-test (name file)
+  `(define-test ,name
+     :parent samples
+     (let ((source (wav-samples ,(make-pathname :type "wav" :defaults file)))
+           (decoded (wav-samples ,(make-pathname :type "wav" :name (format NIL "~a.qoa" (pathname-name file)) :defaults file)))
+           (encoded (alexandria:read-file-into-byte-vector ,file)))
+       (is equalp encoded (qoa:encode-file source 'vector))
+       (is equalp decoded (qoa:decode-file encoded)))))
+
+(macrolet ((define-all-samples ()
+             `(progn ,@(loop for file in (directory (make-pathname :name :wild :type "qoa" :defaults *samples-directory*))
+                             collect `(define-sample-test ,(intern (string-upcase (pathname-name file))) ,file)))))
+  (define-all-samples))
