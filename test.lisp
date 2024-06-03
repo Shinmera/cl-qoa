@@ -24,17 +24,6 @@
 (defun silence (&optional (length 128))
   (generate length (constantly 0)))
 
-(defun wav-samples (file)
-  (with-open-file (stream file :element-type '(unsigned-byte 8))
-    (dotimes (i 12) (read-byte stream))
-    (loop for label = (map-into (make-string 4) (lambda () (code-char (read-byte stream))))
-          for length = (nibbles:read-ub32/le stream)
-          do (if (string= "data" label)
-                 (let ((samples (make-array (truncate length 2) :element-type '(signed-byte 16))))
-                   (nibbles:read-sb16/le-into-sequence samples stream)
-                   (return samples))
-                 (dotimes (i length) (read-byte stream))))))
-
 (defun diff (a b)
   (if (/= (length a) (length b))
       (list :length :expected (length a) :got (length b))
@@ -64,9 +53,9 @@
   (multiple-value-bind (source encoded decoded) (sample-files file)
     `(define-test ,name
        :parent samples
-       (let ((source (wav-samples ,source))
+       (let ((source (qoa::wav-samples ,source))
              (encoded (alexandria:read-file-into-byte-vector ,encoded))
-             (decoded (wav-samples ,decoded)))
+             (decoded (qoa::wav-samples ,decoded)))
          (is eql NIL (diff encoded (qoa:encode-file source 'vector)))
          (is eql NIL (diff decoded (qoa:decode-file encoded)))))))
 

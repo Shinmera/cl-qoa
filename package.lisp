@@ -15,4 +15,5 @@
    #:decode-frame
    #:decode-to-buffer
    #:decode-file
+   #:convert-wav
    #:channel-layout))

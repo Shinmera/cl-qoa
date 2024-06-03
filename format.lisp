@@ -311,6 +311,34 @@
     (T
      (decode-file (apply #'read-file file args)))))
 
+(defun wav-samples (file)
+  (with-open-file (stream file :element-type '(unsigned-byte 8))
+    (flet ((read-token ()
+             (map-into (make-string 4) (lambda () (code-char (read-byte stream))))))
+      (let ((samplerate 44100)
+            (channels 1))
+        (assert (string= "RIFF" (read-token)))
+        (dotimes (i 4) (read-byte stream))
+        (assert (string= "WAVE" (read-token)))
+        (loop for label = (read-token)
+              for length = (nibbles:read-ub32/le stream)
+              do (cond ((string= "data" label)
+                        (let ((samples (make-array (truncate length 2) :element-type '(signed-byte 16))))
+                          (nibbles:read-sb16/le-into-sequence samples stream)
+                          (return (values samples channels samplerate))))
+                       ((string= "fmt " label)
+                        (assert (= 1 (nibbles:read-ub16/le stream)))
+                        (setf channels (nibbles:read-ub16/le stream))
+                        (setf samplerate (nibbles:read-ub32/le stream))
+                        (dotimes (i 6) (read-byte stream))
+                        (assert (= 16 (nibbles:read-ub16/le stream))))
+                       (T
+                        (dotimes (i length) (read-byte stream)))))))))
+
+(defun convert-wav (in &optional (out (make-pathname :type "qoa" :defaults in)))
+  (multiple-value-bind (samples channels samplerate) (wav-samples in)
+    (encode-file samples out :channels channels :samplerate samplerate)))
+
 (defun channel-layout (count)
   (ecase count
     (1 '(:center))
