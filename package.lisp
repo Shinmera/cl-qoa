@@ -8,6 +8,7 @@
    #:frame
    #:frames
    #:octet-size
+   #:samples/channel
    #:samplerate
    #:channels
    #:read-file

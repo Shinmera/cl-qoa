@@ -83,6 +83,9 @@
 (defmethod channels ((frame frame))
   (frame-channels frame))
 
+(defmethod samples/channel ((frame frame))
+  (frame-samples/channel frame))
+
 (bs:define-io-structure file
   "qoaf"
   (samples uint32-be)
@@ -99,6 +102,9 @@
 
 (defmethod octet-size ((file file))
   (bs:octet-size file))
+
+(defmethod samples/channel ((file file))
+  (file-samples file))
 
 (defmethod print-object ((file file) stream)
   (print-unreadable-object (file stream :type T :identity T)

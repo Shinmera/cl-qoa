@@ -10,6 +10,7 @@ encoded data, with possibly variable numbers of channels and
 samplerates per frame, though this is not typically the case.
 
 See OCTET-SIZE
+See SAMPLES/CHANNEL
 See FRAMES
 See SAMPLERATE
 See CHANNELS
@@ -30,6 +31,7 @@ See OCTET-SIZE
 See SAMPLERATE
 See CHANNELS
 See DECODE-FRAME
+See SAMPLES/CHANNEL
 See FILE (type)")
 
   (function frames
@@ -40,6 +42,12 @@ See FRAME (type)")
   
   (function octet-size
     "Returns the octet-size of the QOA file or frame if it were written out.
+
+See FILE (type)
+See FRAME (type)")
+
+  (function samples/channel
+    "Returns the number of samples per channel in the file or frame.
 
 See FILE (type)
 See FRAME (type)")
