@@ -274,11 +274,11 @@
           do (loop for c from 0 below channels
                    for slice = (aref slices p)
                    for scale-factor = (ldb (byte 4 60) slice)
-                   do (loop for si from (+ c (* channels sample-index))
-                            below (+ c (* channels (clamp (+ sample-index SLICE-LENGTH) 0 sample-count)))
-                            by channels
+                   for slice-start = (+ c (* channels sample-index))
+                   for slice-end = (+ c (* channels (clamp (+ sample-index SLICE-LENGTH) 0 sample-count)))
+                   do (loop for si from slice-start below slice-end by channels
                             for predicted = (lms-predict (aref lms c))
-                            for quantized = (logand #x7 (ash slice -57))
+                            for quantized = (logand (ash slice -57) #x7)
                             for dequantized = (aref DEQUANTIZATION-TABLE scale-factor quantized)
                             for reconstructed = (clamp-16 (+ predicted dequantized))
                             do (setf (aref samples start) reconstructed)
@@ -296,7 +296,7 @@
   (loop for frame = (aref (file-frames file) frame-start)
         do (setf start (decode-frame frame samples start end))
            (incf frame-start)
-        while (< end start)
+        while (< start end)
         finally (return (values start frame-start))))
 
 (defun decode-file (file &rest args)
