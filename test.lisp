@@ -9,7 +9,12 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *samples-directory*
-    #.(merge-pathnames "samples/" (make-pathname :name NIL :type NIL :defaults (or *compile-file-truename* *load-truename*)))))
+    #.(merge-pathnames "samples/" (make-pathname :name NIL :type NIL :defaults (or *compile-file-truename* *load-truename*))))
+
+  (defun sample-files (file)
+    (values (make-pathname :type "wav" :defaults file)
+            (make-pathname :type "qoa" :defaults file)
+            (make-pathname :type "wav" :name (format NIL "~a.qoa" (pathname-name file)) :defaults file))))
 
 (define-test qoa)
 
@@ -36,11 +41,6 @@
       (loop for i from 0 below (length a)
             do (when (/= (aref a i) (aref b i))
                  (return (list :mismatch :at i :expected (aref a i) :got (aref b i)))))))
-
-(defun sample-files (file)
-  (values (make-pathname :type "wav" :defaults file)
-          (make-pathname :type "qoa" :defaults file)
-          (make-pathname :type "wav" :name (format NIL "~a.qoa" (pathname-name file)) :defaults file)))
 
 (defun generate-reference (file)
   (multiple-value-bind (source encoded decoded) (sample-files file)
@@ -74,7 +74,3 @@
              `(progn ,@(loop for file in (directory (make-pathname :name :wild :type "qoa" :defaults *samples-directory*))
                              collect `(define-sample-test ,(intern (string-upcase (pathname-name file))) ,file)))))
   (define-all-samples))
-
-
-(DEFINE-SAMPLE-TEST SILENCE
-  #P"/home/linus/Projects/cl/cl-qoa/samples/silence.qoa")
