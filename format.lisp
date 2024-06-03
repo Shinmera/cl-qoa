@@ -69,7 +69,8 @@
 
 (defmethod print-object ((frame frame) stream)
   (print-unreadable-object (frame stream :type T :identity T)
-    (format stream "~d channel~:p @ ~d Hz" (frame-channels frame) (frame-samplerate frame))))
+    (format stream "~d samples, ~d channel~:p @ ~d Hz"
+            (frame-samples/channel frame) (frame-channels frame) (frame-samplerate frame))))
 
 (defmethod octet-size ((frame frame))
   (bs:octet-size frame))
@@ -91,8 +92,8 @@
 (defmethod print-object ((file file) stream)
   (print-unreadable-object (file stream :type T :identity T)
     (if (< 0 (length (file-frames file)))
-        (format stream "~d samples, ~d channel~:p, ~d Hz"
-                (file-samples file) (channels file) (samplerate file))
+        (format stream "~d sample~:p, ~d frame~:p, ~d channel~:p @ ~d Hz"
+                (file-samples file) (length (file-frames file)) (channels file) (samplerate file))
         (format stream "INVALID"))))
 
 (defun lms-predict (lms)
